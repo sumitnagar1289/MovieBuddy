@@ -1,11 +1,16 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import appStore from '../utils/appStore'
-import { signOut } from 'firebase/auth'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { auth } from '../utils/firebase'
 import { useNavigate } from 'react-router-dom'
-import { removeUser } from '../utils/userSlice'
+
+import { addUser, removeUser } from '../utils/userSlice';
+import { LOGO } from '../utils/constants'
+
+
+
 const Header = () => {
+
 const navigate = useNavigate();
 const user= useSelector(store=>store.user);
 const dispatch = useDispatch();
@@ -13,23 +18,38 @@ const handleSignOut =()=>{
     signOut(auth).then(() => {
         // Sign-out successful.
         // dispatch(removeUser);
-        navigate("/");
+       
       }).catch((error) => {
         // An error happened.
         navigate("/error");
       });
 }
 
+useEffect(()=>{
+
+    const unsubscribe= onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const {uid,email,displayName} = user;
+        dispatch(addUser({uid:uid,email:email,displayName:displayName}));
+        navigate("/browse")
+      } else {
+        dispatch(removeUser());
+        navigate("/");
+      }
+    });
+    return ()=> unsubscribe();
+        },[]);
+
   return (
 
-    <div className="w-full absolute z-10 bg-gradient-to-b flex justify-between from-white shadow-lg">
+    <div className="w-full bg-opacity-100 absolute z-10  flex justify-between">
        
         <img className='m-5 w-60'
-          src="https://www.ucraft.com/ai-logo-generator/app/_next/image?url=https%3A%2F%2Fstatic.ucraft.ai%2Ffs%2Flogos%2Fpng%2Fa9b46c3e-78d7-4bbb-a334-c48d344bc79c%2Fwordmark%2F5ed199ca-4bcf-4fb2-8d16-4bc576f6495c.png&w=1080&q=75"
-          alt=""
+          src={LOGO}
+          alt="Movie-Buddy-Logo"
         />
         {user &&  <div className='w-60 flex flex-col justify-between items-center'>
-           <p className='text-xl text-red-400'>{user.displayName}</p>
+           <p className='text-xl text-red-400'>{user?.displayName}</p>
         
             <button className='text-white p-2 rounded-lg hover:bg-slate-600 font-bold text-xl mb-3 mx-10 bg-black' onClick={handleSignOut} >Sign Out</button>
         

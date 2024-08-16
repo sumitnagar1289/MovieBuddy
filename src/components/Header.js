@@ -42,7 +42,7 @@ useEffect(()=>{
 
   return (
 
-    <div className="w-full bg-opacity-100 absolute z-10  flex justify-between">
+    <div className="w-full bg-opacity-100 absolute z-20 flex justify-between">
        
         <img className='m-5 w-60'
           src={LOGO}
